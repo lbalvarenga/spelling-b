@@ -51,10 +51,9 @@ function Colored(props: ColoredProps) {
         <h1>
           {colorify(props.word, props.highlight).map((text, index) => {
             return (
-              <>
+              <span key={index}>
                 {text.color ? (
                   <span
-                    key={index}
                     css={css`
                       color: ${theme.accent};
                     `}
@@ -64,7 +63,7 @@ function Colored(props: ColoredProps) {
                 ) : (
                   text.str.toUpperCase()
                 )}
-              </>
+              </span>
             );
           })}
         </h1>

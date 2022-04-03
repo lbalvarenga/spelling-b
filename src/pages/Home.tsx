@@ -108,7 +108,7 @@ function Home() {
         >
           Source
         </a>
-        <Link css={styles.btn} to="/play/new">
+        <Link css={styles.btn} to="/play">
           Play
         </Link>
         <h3 css={styles.date}>Version Alpha</h3>

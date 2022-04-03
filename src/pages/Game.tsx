@@ -67,7 +67,6 @@ function Game() {
       }
     `,
 
-    // TODO: cursor positioning
     cursor: css`
       height: 50%;
       width: 2px;
@@ -95,7 +94,6 @@ function Game() {
       }
     `,
 
-    // TODO: hive elements positioning
     hive: css`
       margin-bottom: 10px;
     `,
@@ -164,7 +162,6 @@ function Game() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // TODO: sort non-relevant characters alphabetically
   useEffect(() => {
     async function setup(letters: string) {
       let game = await getWords("/words_webster.json", letters);
@@ -246,11 +243,11 @@ function Game() {
       setCustomStyle({
         ...customStyle,
         input: css`
-          transition: 0.25s ease-in-out;
+          transition: 0.2s ease-in-out;
           color: red !important;
 
           span {
-            transition: 0.25s ease-in-out;
+            transition: 0.2s ease-in-out;
             color: red !important;
           }
         `,
@@ -262,7 +259,7 @@ function Game() {
           ...customStyle,
           input: css``,
         });
-      }, 500);
+      }, 350);
     }
   }
 
@@ -440,9 +437,6 @@ async function getWords(
   //@ts-ignore
   let valid = [...new Set(found)];
   valid = valid.filter((word) => word.length > 3 && word.includes(letters[0]));
-
-  // console.log(`${lts[0].toUpperCase()}, ${lts.slice(1)}`)
-  // console.log(valid);
 
   return { letters: letters, words: valid, source: obj.credits };
 }
