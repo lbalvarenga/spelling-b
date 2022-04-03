@@ -16,7 +16,7 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}>
-          <Route path="play" element={<Game />} />
+          <Route path="play/:id" element={<Game />} />
           <Route path="home" element={<Home />} />
         </Route>
       </Routes>

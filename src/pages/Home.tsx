@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from "@emotion/react";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 const theme = {
@@ -9,6 +9,7 @@ const theme = {
 };
 
 // TODO: refactor buttons
+// TODO: add loading screen
 function Home() {
   const styles = {
     home: css`
@@ -107,7 +108,7 @@ function Home() {
         >
           Source
         </a>
-        <Link css={styles.btn} to="/play">
+        <Link css={styles.btn} to="/play/new">
           Play
         </Link>
         <h3 css={styles.date}>Version Alpha</h3>

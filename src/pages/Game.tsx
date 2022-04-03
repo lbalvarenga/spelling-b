@@ -2,6 +2,7 @@
 import { css } from "@emotion/react";
 
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { BtnOutline } from "../components/Btn";
 import Colored from "../components/Colored";
@@ -23,10 +24,9 @@ const theme = {
 
 // TODO: cleanup code
 // TODO: add points calculation system
-// TODO: add URL system
 // TODO: unfocus buttons when typing
 // TODO: mobile ready
-// TODO: press button when typing with kbd
+// TODO: press button visually when typing with kbd
 function Game() {
   const styles = {
     container: css`
@@ -155,13 +155,19 @@ function Game() {
     _setState(data);
   };
 
-  // TODO: implement game URLs
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // TODO: sort non-relevant characters alphabetically
   useEffect(() => {
-    async function setup() {
-      let game = await getWords("/words.json");
+    async function setup(letters: string) {
+      let game = await getWords("/words_webster.json", letters);
       while (game.words.length < 10) {
-        game = await getWords("/words.json");
+        letters = getLetters(7);
+        game = await getWords("/words_webster.json", letters);
       }
+
+      navigate(`/play/${letters}`);
 
       console.log(`${game.letters[0].toUpperCase()}, ${game.letters.slice(1)}`);
       console.log(game.words);
@@ -172,7 +178,17 @@ function Game() {
       });
     }
 
-    setup();
+    const li = location.pathname.lastIndexOf("/");
+    const path = location.pathname.slice(li + 1);
+
+    let letters = path;
+
+    const re = /^[a-z]{7}$/g;
+    if (!re.test(path)) {
+      letters = getLetters(7);
+    }
+
+    setup(letters);
   }, []);
 
   useEffect(() => {
@@ -375,26 +391,29 @@ function getLetters(n: number) {
     letters = letters.concat(char);
   }
 
-  return letters;
+  // ...
+  return letters[0].concat(letters.slice(1).split("").sort().join(""));
 }
 
 // Where letters[0] is must have letter
 // TODO: dynamic filename
-async function getWords(filename: string): Promise<GameState["game"]> {
+async function getWords(
+  filename: string,
+  letters: string
+): Promise<GameState["game"]> {
   const res = await fetch(filename);
   const obj: { data: string; credits: string } = await res.json();
   const words = obj.data;
 
-  const lts = getLetters(7);
-  const re = new RegExp(`\\b[${lts}]+\\b`, "gi");
+  const re = new RegExp(`\\b[${letters}]+\\b`, "gi");
   const found = words.match(re);
 
   //@ts-ignore
   let valid = [...new Set(found)];
-  valid = valid.filter((word) => word.length > 3 && word.includes(lts[0]));
+  valid = valid.filter((word) => word.length > 3 && word.includes(letters[0]));
 
   // console.log(`${lts[0].toUpperCase()}, ${lts.slice(1)}`)
   // console.log(valid);
 
-  return { letters: lts, words: valid, source: obj.credits };
+  return { letters: letters, words: valid, source: obj.credits };
 }
