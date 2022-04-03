@@ -16,6 +16,7 @@ type GameState = {
   };
   guess: string;
   correct: string[];
+  timeout: ReturnType<typeof setTimeout> | undefined;
 };
 
 const theme = {
@@ -126,7 +127,6 @@ function Game() {
       padding: 20px;
       padding-top: 0;
 
-
       @media (max-width: 1000px) {
         height: 150px;
       }
@@ -195,12 +195,15 @@ function Game() {
     },
     correct: [],
     guess: "",
+    timeout: undefined,
   });
   const stateRef = useRef(state);
   const setState = (data: GameState) => {
     stateRef.current = data;
     _setState(data);
   };
+
+  let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
   const [customStyle, setCustomStyle] = useState<{
     input: SerializedStyles;
@@ -222,6 +225,7 @@ function Game() {
       console.log(`${game.letters[0].toUpperCase()}, ${game.letters.slice(1)}`);
       console.log(game.words);
       setState({
+        ...stateRef.current,
         game: game,
         correct: [],
         guess: "",
@@ -252,6 +256,14 @@ function Game() {
     // Remove potential button focus
     // @ts-ignore
     document.activeElement.blur();
+
+    // Cancels shake animation if running
+    const sr = stateRef.current;
+    if (sr.timeout) {
+      clearTimeout(sr.timeout);
+      clearGuess();
+      setState({ ...sr, guess: "", timeout: undefined });
+    }
 
     switch (event.key) {
       case "Backspace":
@@ -301,13 +313,7 @@ function Game() {
         `,
       });
 
-      setTimeout(() => {
-        setState({ ...state, guess: "" });
-        setCustomStyle({
-          ...customStyle,
-          input: css``,
-        });
-      }, 600);
+      setState({ ...stateRef.current, timeout: setTimeout(clearGuess, 600) });
     }
   }
 
@@ -322,6 +328,16 @@ function Game() {
     setState({
       ...stateRef.current,
       guess: stateRef.current.guess.concat(char.toLowerCase()),
+    });
+  }
+
+  function clearGuess() {
+    const sr = stateRef.current;
+
+    setState({ ...sr, guess: "" });
+    setCustomStyle({
+      ...customStyle,
+      input: css``,
     });
   }
 
