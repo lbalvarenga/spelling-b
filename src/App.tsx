@@ -28,6 +28,7 @@ function App() {
       * {
         box-sizing: border-box;
         font-family: "Libre Franklin", sans-serif;
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
       }
     `,
   };
