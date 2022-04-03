@@ -45,7 +45,7 @@ function Colored(props: ColoredProps) {
   }
 
   return (
-    <>
+    <div css={props.style}>
       {props.word ? (
         // TODO: this code looks awful
         <h1>
@@ -77,7 +77,7 @@ function Colored(props: ColoredProps) {
           {props.placeholder}
         </h1>
       )}
-    </>
+    </div>
   );
 }
 

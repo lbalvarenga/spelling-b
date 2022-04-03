@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import { css } from "@emotion/react";
+import { css, Interpolation, SerializedStyles, Theme } from "@emotion/react";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import { BtnOutline } from "../components/Btn";
@@ -29,6 +29,8 @@ const theme = {
 // TODO: press button visually when typing with kbd
 function Game() {
   const styles = {
+    test: css``,
+
     container: css`
       display: flex;
       align-items: center;
@@ -155,6 +157,10 @@ function Game() {
     _setState(data);
   };
 
+  const [customStyle, setCustomStyle] = useState<{
+    input: SerializedStyles;
+  }>();
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -223,7 +229,7 @@ function Game() {
     const state = stateRef.current;
     if (!state.guess || !state.game) return;
 
-    setState({ ...state, guess: "" });
+    // setState({ ...state, guess: "" });
     if (
       state.game.words.includes(state.guess) &&
       !state.correct.includes(state.guess)
@@ -233,6 +239,30 @@ function Game() {
         correct: [...state.correct, state.guess],
         guess: "",
       });
+    }
+
+    // TODO: wiggle animation, smooth fade out
+    else {
+      setCustomStyle({
+        ...customStyle,
+        input: css`
+          transition: 0.25s ease-in-out;
+          color: red !important;
+
+          span {
+            transition: 0.25s ease-in-out;
+            color: red !important;
+          }
+        `,
+      });
+
+      setTimeout(() => {
+        setState({ ...state, guess: "" });
+        setCustomStyle({
+          ...customStyle,
+          input: css``,
+        });
+      }, 500);
     }
   }
 
@@ -286,6 +316,7 @@ function Game() {
       <div css={styles.left}>
         <div css={styles.input}>
           <Colored
+            style={customStyle?.input}
             highlight={state.game.letters[0]}
             placeholder="Type or click"
             word={state.guess}
@@ -299,7 +330,6 @@ function Game() {
           style={styles.hive}
         />
 
-        {/* TODO: animate wrong guess */}
         {/* TODO: refactor buttons */}
         <div>
           <button
@@ -396,7 +426,6 @@ function getLetters(n: number) {
 }
 
 // Where letters[0] is must have letter
-// TODO: dynamic filename
 async function getWords(
   filename: string,
   letters: string
