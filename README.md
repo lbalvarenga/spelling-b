@@ -1,3 +1,13 @@
+# Spelling Bee (NYTimes Clone)
+
+A game where the player must guess all words that contain a magic letter, having 6 other letters to help him.
+
+Created in a day, don't expect high quality code.
+
+![Home Page](./docs/img-home.jpeg)
+
+![Game Page](./docs/img-play.jpeg)
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

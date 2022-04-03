@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+/** @jsxImportSource @emotion/react */
+import { css, Global } from "@emotion/react";
+
+import React from "react";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+
+// TODO: create theme reducer + dark theme
 
 function App() {
+  const styles = {
+    container: css`
+      display: flex;
+      width: 100%;
+      height: 100%;
+    `,
+    app: css`
+      body,
+      html,
+      #root {
+        margin: 0;
+        padding: 0;
+
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: "Libre Franklin", sans-serif;
+      }
+    `,
+  };
+
+  // TODO: more elegant solution
+  const location = useLocation();
+  if (location.pathname === "/") {
+    return <Navigate to="/home" />;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div css={styles.container}>
+      <Global styles={styles.app} />
+      <Outlet />
     </div>
   );
 }
