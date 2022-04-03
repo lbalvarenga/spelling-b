@@ -325,6 +325,14 @@ function Game() {
   }
 
   function concatGuess(char: string) {
+    // Cancels shake animation if running
+    const sr = stateRef.current;
+    if (sr.timeout) {
+      clearTimeout(sr.timeout);
+      clearGuess();
+      setState({ ...sr, guess: "", timeout: undefined });
+    }
+
     setState({
       ...stateRef.current,
       guess: stateRef.current.guess.concat(char.toLowerCase()),
