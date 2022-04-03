@@ -46,33 +46,35 @@ function Colored(props: ColoredProps) {
 
   return (
     <>
-      {/* TODO: highlight special letter  */}
       {props.word ? (
         // TODO: this code looks awful
-        colorify(props.word, props.highlight).map((text, index) => {
-          return (
-            <h1 key={index}>
-              {text.color ? (
-                <span
-                  css={css`
-                    color: ${theme.accent};
-                  `}
-                >
-                  {text.str.toUpperCase()}
-                </span>
-              ) : (
-                text.str.toUpperCase()
-              )}
-            </h1>
-          );
-        })
+        <h1>
+          {colorify(props.word, props.highlight).map((text, index) => {
+            return (
+              <>
+                {text.color ? (
+                  <span
+                    key={index}
+                    css={css`
+                      color: ${theme.accent};
+                    `}
+                  >
+                    {text.str.toUpperCase()}
+                  </span>
+                ) : (
+                  text.str.toUpperCase()
+                )}
+              </>
+            );
+          })}
+        </h1>
       ) : (
         <h1
           css={css`
             color: #bbbbbb;
           `}
         >
-        {props.placeholder}
+          {props.placeholder}
         </h1>
       )}
     </>
