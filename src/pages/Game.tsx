@@ -313,7 +313,7 @@ function Game() {
         `,
       });
 
-      setState({ ...stateRef.current, timeout: setTimeout(clearGuess, 600) });
+      setState({ ...stateRef.current, timeout: setTimeout(clearGuess, 550) });
     }
   }
 
