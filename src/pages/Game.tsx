@@ -185,6 +185,20 @@ function Game() {
       width: 100%;
       margin-bottom: 0;
     `,
+
+    refresh: css`
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      font-weight: bold;
+
+      &:hover {
+        cursor: pointer;
+      }
+    `,
   };
 
   const [state, _setState] = useState<GameState>({
@@ -296,7 +310,7 @@ function Game() {
     ) {
       setState({
         ...state,
-        correct: [...state.correct, state.guess],
+        correct: [...state.correct, state.guess].sort(),
         guess: "",
       });
     }
@@ -382,6 +396,15 @@ function Game() {
 
   return (
     <div css={styles.container}>
+      <button
+        css={styles.refresh}
+        onClick={() => {
+          navigate("/play");
+          window.location.reload();
+        }}
+      >
+        ↻
+      </button>
       <div css={styles.left}>
         <div css={styles.input}>
           <Colored
