@@ -223,7 +223,7 @@ function Game() {
       console.log(game.words);
       setState({
         game: game,
-        correct: ["AAAAAA", "BBBBBB", "CCCCCC", "DDDDDD", "EEEEEE", "FFFFFF"],
+        correct: [],
         guess: "",
       });
     }
