@@ -11,7 +11,6 @@ type BtnProps = {
 function Btn(props: BtnProps) {
   const styles = {
     btn: css`
-      display: inline-block;
       text-decoration: none;
       color: white;
       background-color: black;

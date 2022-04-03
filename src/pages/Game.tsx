@@ -24,13 +24,9 @@ const theme = {
 
 // TODO: cleanup code
 // TODO: add points calculation system
-// TODO: unfocus buttons when typing
-// TODO: mobile ready
 // TODO: press button visually when typing with kbd
 function Game() {
   const styles = {
-    test: css``,
-
     container: css`
       display: flex;
       align-items: center;
@@ -40,7 +36,12 @@ function Game() {
       height: 100%;
 
       text-align: center;
+
+      @media (max-width: 1000px) {
+        flex-direction: column-reverse;
+      }
     `,
+
     left: css`
       flex: 1;
       display: flex;
@@ -121,6 +122,11 @@ function Game() {
       }
 
       margin: 0;
+
+      @media (max-width: 1000px) {
+        padding: 15px 20px;
+        width: auto;
+      }
     `,
 
     score: css`
@@ -133,6 +139,25 @@ function Game() {
         margin: 0;
         padding: 0;
       }
+    `,
+
+    wordArray: css`
+      display: flex;
+      flex: 1;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      column-gap: 20px;
+
+      p {
+        margin-bottom: 0;
+      }
+    `,
+
+    correctWord: css`
+      margin-bottom: 0;
+      text-decoration: underline;
+      text-decoration-color: #bbbbbb;
+      text-decoration-thickness: 2px;
     `,
 
     footer: css`
@@ -202,6 +227,10 @@ function Game() {
   });
 
   function handleKeys(event: KeyboardEvent) {
+    // Remove potential button focus
+    // @ts-ignore
+    document.activeElement.blur();
+
     switch (event.key) {
       case "Backspace":
         backspaceGuess();
@@ -347,9 +376,9 @@ function Game() {
               style={[
                 styles.btn,
                 css`
-                  width: 50px;
-                  padding-left: 10px;
-                  padding-right: 10px;
+                  width: 50px !important;
+                  padding-left: 10px !important;
+                  padding-right: 10px !important;
                 `,
               ]}
             >
@@ -373,14 +402,20 @@ function Game() {
         </div>
         <div css={styles.card}>
           <div css={styles.cardContent}>
-            <div>
-              <p>
+            <div css={styles.wordArray}>
+              <p
+                css={css`
+                  width: 100%;
+                `}
+              >
                 You have found {state.correct.length} word
                 {state.correct.length === 1 ? "" : "s"} out of{" "}
                 {state.game.words.length}.
               </p>
               {state.correct.map((word) => (
-                <p key={word}>{word.toUpperCase()}</p>
+                <p key={word} css={styles.correctWord}>
+                  {word.toUpperCase()}
+                </p>
               ))}
             </div>
             <p css={styles.footer}>
