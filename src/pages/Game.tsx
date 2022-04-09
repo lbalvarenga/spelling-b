@@ -4,7 +4,7 @@ import { css, Interpolation, SerializedStyles, Theme } from "@emotion/react";
 import React, { LegacyRef, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { BtnOutline } from "../components/Btn";
+import Btn, { BtnOutline } from "../components/Btn";
 import Colored from "../components/Colored";
 import Hive from "../components/Hive";
 
@@ -152,8 +152,10 @@ function Game() {
     score: css`
       display: flex;
       text-align: left;
+      align-items: center;
       margin: 10px 10px;
       margin-bottom: 0;
+      justify-content: space-between;
 
       h3 {
         margin: 0;
@@ -187,13 +189,17 @@ function Game() {
     `,
 
     refresh: css`
-      position: absolute;
-      top: 5px;
-      right: 10px;
       background: none;
       border: none;
-      font-size: 1.5em;
-      font-weight: bold;
+
+      &:hover {
+        cursor: pointer;
+      }
+    `,
+
+    reveal: css`
+      background: none;
+      border: none;
 
       &:hover {
         cursor: pointer;
@@ -396,15 +402,6 @@ function Game() {
 
   return (
     <div css={styles.container}>
-      <button
-        css={styles.refresh}
-        onClick={() => {
-          navigate("/play");
-          window.location.reload();
-        }}
-      >
-        ↻
-      </button>
       <div css={styles.left}>
         <div css={styles.input}>
           <Colored
@@ -465,6 +462,34 @@ function Game() {
       <div css={styles.right}>
         <div css={styles.score}>
           <h3>{getScore()}</h3>
+          <div>
+            <button
+              css={styles.reveal}
+              onClick={() => {
+                setState({ ...state, correct: state.game.words });
+              }}
+            >
+              <Btn>Reveal</Btn>
+            </button>
+            <button
+              css={styles.refresh}
+              onClick={() => {
+                navigate("/play");
+                window.location.reload();
+              }}
+            >
+              <BtnOutline
+                style={css`
+                  margin: 0;
+                  width: 50px !important;
+                  padding-left: 10px !important;
+                  padding-right: 10px !important;
+                `}
+              >
+                ↻
+              </BtnOutline>
+            </button>
+          </div>
         </div>
         <div css={styles.card}>
           <div css={styles.cardContent}>
