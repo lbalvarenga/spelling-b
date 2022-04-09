@@ -15,7 +15,7 @@ type GameState = {
     source?: string;
   };
   guess: string;
-  correct: string[];
+  correct: { str: string; color: string }[];
   timeout: ReturnType<typeof setTimeout> | undefined;
 };
 
@@ -305,18 +305,49 @@ function Game() {
     }
   }
 
+  function sortCorrect() {
+    const sr = stateRef.current;
+    if (!sr.correct) return;
+
+    const a = new Array(...sr.correct);
+    console.log(a);
+
+    a.sort((a, b) => {
+      return a.str.charCodeAt(0) - b.str.charCodeAt(0);
+    });
+
+    console.log(a);
+    return a;
+  }
+
+  function correctSort(a: any, b: any) {
+    const aa = a.str.toLowerCase();
+    const bb = b.str.toLowerCase();
+    return aa < bb ? -1 : aa > bb ? 1 : 0;
+  }
+
+  function correctIncludes(word: string) {
+    const sr = stateRef.current;
+
+    let contains = false;
+    sr.correct.forEach((c) => {
+      if (c.str === word) contains = true;
+    });
+
+    return contains;
+  }
+
   function verifyGuess() {
-    const state = stateRef.current;
-    if (!state.guess || !state.game) return;
+    const sr = stateRef.current;
+    if (!sr.guess || !sr.game) return;
 
     // setState({ ...state, guess: "" });
-    if (
-      state.game.words.includes(state.guess) &&
-      !state.correct.includes(state.guess)
-    ) {
+    if (sr.game.words.includes(sr.guess) && !correctIncludes(sr.guess)) {
       setState({
-        ...state,
-        correct: [...state.correct, state.guess].sort(),
+        ...sr,
+        correct: [...sr.correct, { str: sr.guess, color: "null" }].sort(
+          correctSort
+        ),
         guess: "",
       });
     }
@@ -466,7 +497,16 @@ function Game() {
             <button
               css={styles.reveal}
               onClick={() => {
-                setState({ ...state, correct: state.game.words });
+                const all: { str: string; color: string }[] = [];
+                state.game.words.forEach((word) => {
+                  if (!correctIncludes(word)) {
+                    all.push({ str: word, color: "red" });
+                  }
+                });
+                setState({
+                  ...state,
+                  correct: [...state.correct, ...all].sort(correctSort),
+                });
               }}
             >
               <Btn>Reveal</Btn>
@@ -503,11 +543,22 @@ function Game() {
                 {state.correct.length === 1 ? "" : "s"} out of{" "}
                 {state.game.words.length}.
               </p>
-              {state.correct.map((word) => (
-                <p key={word} css={styles.correctWord}>
-                  {word.toUpperCase()}
-                </p>
-              ))}
+              {state.correct.map((word) => {
+                return (
+                  <p
+                    key={word.str}
+                    css={[
+                      styles.correctWord,
+                      css`
+                        color: ${word.color};
+                        text-decoration-color: ${word.color};
+                      `,
+                    ]}
+                  >
+                    {word.str.toUpperCase()}
+                  </p>
+                );
+              })}
             </div>
             <p css={styles.footer}>
               Source:{" "}
