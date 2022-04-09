@@ -1,23 +1,15 @@
 /** @jsxImportSource @emotion/react */
-import { css, Interpolation, SerializedStyles, Theme } from "@emotion/react";
+import { css, SerializedStyles } from "@emotion/react";
 
-import React, { LegacyRef, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import Btn, { BtnOutline } from "../components/Btn";
 import Colored from "../components/Colored";
 import Hive from "../components/Hive";
+import ShakeAnim from "../components/ShakeAnim";
 
-type GameState = {
-  game: {
-    letters: string;
-    words: string[];
-    source?: string;
-  };
-  guess: string;
-  correct: { str: string; color: string }[];
-  timeout: ReturnType<typeof setTimeout> | undefined;
-};
+import Game from "../components/GameLogic";
 
 const theme = {
   accent: "#F7DA43",
@@ -26,7 +18,7 @@ const theme = {
 // TODO: cleanup code
 // TODO: add points calculation system
 // TODO: press button visually when typing with kbd
-function Game() {
+function GameView() {
   const styles = {
     container: css`
       display: flex;
@@ -149,6 +141,12 @@ function Game() {
       }
     `,
 
+    btnRound: css`
+      width: 50px !important;
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+    `,
+
     score: css`
       display: flex;
       text-align: left;
@@ -207,7 +205,7 @@ function Game() {
     `,
   };
 
-  const [state, _setState] = useState<GameState>({
+  const [state, _setState] = useState<Game.StateType>({
     game: {
       letters: "",
       words: [],
@@ -218,12 +216,10 @@ function Game() {
     timeout: undefined,
   });
   const stateRef = useRef(state);
-  const setState = (data: GameState) => {
+  const setState = (data: Game.StateType) => {
     stateRef.current = data;
     _setState(data);
   };
-
-  let timeout: ReturnType<typeof setTimeout> | undefined = undefined;
 
   const [customStyle, setCustomStyle] = useState<{
     input: SerializedStyles;
@@ -234,10 +230,10 @@ function Game() {
 
   useEffect(() => {
     async function setup(letters: string) {
-      let game = await getWords("/words_webster.json", letters);
+      let game = await Game.getWords("/words_webster.json", letters);
       while (game.words.length < 10) {
-        letters = getLetters(7);
-        game = await getWords("/words_webster.json", letters);
+        letters = Game.getLetters(7);
+        game = await Game.getWords("/words_webster.json", letters);
       }
 
       navigate(`/play/${letters}`);
@@ -259,7 +255,7 @@ function Game() {
 
     const re = /^[a-z]{7}$/g;
     if (!re.test(path)) {
-      letters = getLetters(7);
+      letters = Game.getLetters(7);
     }
 
     setup(letters);
@@ -305,21 +301,6 @@ function Game() {
     }
   }
 
-  function sortCorrect() {
-    const sr = stateRef.current;
-    if (!sr.correct) return;
-
-    const a = new Array(...sr.correct);
-    console.log(a);
-
-    a.sort((a, b) => {
-      return a.str.charCodeAt(0) - b.str.charCodeAt(0);
-    });
-
-    console.log(a);
-    return a;
-  }
-
   function correctSort(a: any, b: any) {
     const aa = a.str.toLowerCase();
     const bb = b.str.toLowerCase();
@@ -357,7 +338,7 @@ function Game() {
       setCustomStyle({
         ...customStyle,
         input: css`
-          ${shakeAnim}
+          ${ShakeAnim}
           -webkit-animation: shake-bottom 0.6s cubic-bezier(0.455, 0.030, 0.515, 0.955) both;
           animation: shake-bottom 0.6s cubic-bezier(0.455, 0.03, 0.515, 0.955)
             both;
@@ -420,17 +401,6 @@ function Game() {
     });
   }
 
-  function getScore() {
-    const sr = stateRef.current;
-    const ratio = sr.correct.length / sr.game.words.length;
-    if (ratio === 1) return "Winner";
-    if (ratio >= 0.9) return "King";
-    if (ratio >= 0.75) return "Professional";
-    if (ratio >= 0.6) return "Advanced";
-    if (ratio >= 0.25) return "Intermediate";
-    return "Beginner";
-  }
-
   return (
     <div css={styles.container}>
       <div css={styles.left}>
@@ -466,18 +436,7 @@ function Game() {
               shuffleLetters();
             }}
           >
-            <BtnOutline
-              style={[
-                styles.btn,
-                css`
-                  width: 50px !important;
-                  padding-left: 10px !important;
-                  padding-right: 10px !important;
-                `,
-              ]}
-            >
-              ↻
-            </BtnOutline>
+            <BtnOutline style={[styles.btn, styles.btnRound]}>↻</BtnOutline>
           </button>
           <button
             css={styles.nobtn}
@@ -492,12 +451,12 @@ function Game() {
 
       <div css={styles.right}>
         <div css={styles.score}>
-          <h3>{getScore()}</h3>
+          <h3>{Game.getScore(stateRef.current)}</h3>
           <div>
             <button
               css={styles.reveal}
               onClick={() => {
-                const all: { str: string; color: string }[] = [];
+                const all: Game.CorrectType = [];
                 state.game.words.forEach((word) => {
                   if (!correctIncludes(word)) {
                     all.push({ str: word, color: "red" });
@@ -551,7 +510,6 @@ function Game() {
                       styles.correctWord,
                       css`
                         color: ${word.color};
-                        text-decoration-color: ${word.color};
                       `,
                     ]}
                   >
@@ -573,127 +531,4 @@ function Game() {
   );
 }
 
-export default Game;
-
-function rand(min: number, max: number) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function getLetter() {
-  return String.fromCharCode("a".charCodeAt(0) + rand(0, 25));
-}
-
-// TODO: enforce minimum # of vowels
-function getLetters(n: number) {
-  let letters = "";
-  let char = getLetter();
-  for (let i = 0; i < n; ++i) {
-    while (letters.includes(char)) {
-      char = getLetter();
-    }
-
-    letters = letters.concat(char);
-  }
-
-  // ...
-  return letters[0].concat(letters.slice(1).split("").sort().join(""));
-}
-
-// Where letters[0] is must have letter
-async function getWords(
-  filename: string,
-  letters: string
-): Promise<GameState["game"]> {
-  const res = await fetch(filename);
-  const obj: { data: string; credits: string } = await res.json();
-  const words = obj.data;
-
-  const re = new RegExp(`\\b[${letters}]+\\b`, "gi");
-  const found = words.match(re);
-
-  //@ts-ignore
-  let valid = [...new Set(found)];
-  valid = valid.filter((word) => word.length > 3 && word.includes(letters[0]));
-
-  return { letters: letters, words: valid, source: obj.credits };
-}
-
-const shakeAnim = `
-/* ----------------------------------------------
- * Generated by Animista on 2022-4-3 18:4:33
- * Licensed under FreeBSD License.
- * See http://animista.net/license for more info. 
- * w: http://animista.net, t: @cssanimista
- * ---------------------------------------------- */
-
-/**
- * ----------------------------------------
- * animation shake-bottom
- * ----------------------------------------
- */
-@-webkit-keyframes shake-bottom {
-  0%,
-  100% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-    -webkit-transform-origin: 50% 100%;
-            transform-origin: 50% 100%;
-  }
-  10% {
-    -webkit-transform: rotate(2deg);
-            transform: rotate(2deg);
-  }
-  20%,
-  40%,
-  60% {
-    -webkit-transform: rotate(-4deg);
-            transform: rotate(-4deg);
-  }
-  30%,
-  50%,
-  70% {
-    -webkit-transform: rotate(4deg);
-            transform: rotate(4deg);
-  }
-  80% {
-    -webkit-transform: rotate(-2deg);
-            transform: rotate(-2deg);
-  }
-  90% {
-    -webkit-transform: rotate(2deg);
-            transform: rotate(2deg);
-  }
-}
-@keyframes shake-bottom {
-  0%,
-  100% {
-    -webkit-transform: rotate(0deg);
-            transform: rotate(0deg);
-    -webkit-transform-origin: 50% 100%;
-            transform-origin: 50% 100%;
-  }
-  10% {
-    -webkit-transform: rotate(2deg);
-            transform: rotate(2deg);
-  }
-  20%,
-  40%,
-  60% {
-    -webkit-transform: rotate(-4deg);
-            transform: rotate(-4deg);
-  }
-  30%,
-  50%,
-  70% {
-    -webkit-transform: rotate(4deg);
-            transform: rotate(4deg);
-  }
-  80% {
-    -webkit-transform: rotate(-2deg);
-            transform: rotate(-2deg);
-  }
-  90% {
-    -webkit-transform: rotate(2deg);
-            transform: rotate(2deg);
-  }
-}`;
+export default GameView;

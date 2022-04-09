@@ -98,7 +98,7 @@ function Home() {
   return (
     <div css={styles.home}>
       <div css={styles.content}>
-        <img css={styles.logo} src="https://via.placeholder.com/500" />
+        <img css={styles.logo} src="/favicon.ico" />
         <h1 css={styles.title}>Spelling Bee</h1>
         <h2 css={styles.desc}>How many words can you make with 7 letters?</h2>
         <a
@@ -111,7 +111,7 @@ function Home() {
         <Link css={styles.btn} to="/play">
           Play
         </Link>
-        <h3 css={styles.date}>Version Alpha</h3>
+        <h3 css={styles.date}>Version Beta</h3>
         <p css={styles.credits}>Created by Lucas Alvarenga</p>
       </div>
     </div>

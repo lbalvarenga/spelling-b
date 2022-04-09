@@ -3,7 +3,7 @@ import * as ReactDOMClient from "react-dom/client";
 
 import App from "./App";
 import Home from "./pages/Home";
-import Game from "./pages/Game";
+import GameView from "./pages/Game";
 
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
@@ -16,8 +16,8 @@ root.render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />}>
-          <Route path="play" element={<Game />} />
-          <Route path="play/:id" element={<Game />} />
+          <Route path="play" element={<GameView />} />
+          <Route path="play/:id" element={<GameView />} />
           <Route path="home" element={<Home />} />
         </Route>
       </Routes>
