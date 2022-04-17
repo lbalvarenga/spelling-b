@@ -12,6 +12,10 @@ namespace Game {
       letters: string;
       words: string[];
       source?: string;
+      dict: {
+        name: string;
+        url: string;
+      };
     };
     correct: Game.CorrectType;
     guess: string;
@@ -39,10 +43,10 @@ namespace Game {
   };
 
   export const getWords = async (
-    filename: string,
+    dict: { name: string; url: string },
     letters: string
   ): Promise<Game.StateType["game"]> => {
-    const res = await fetch(filename);
+    const res = await fetch(dict.url);
     const obj: { data: string; credits: string } = await res.json();
     const words = obj.data;
 
@@ -55,7 +59,7 @@ namespace Game {
       (word) => word.length > 3 && word.includes(letters[0])
     );
 
-    return { letters: letters, words: valid, source: obj.credits };
+    return { dict: dict, letters: letters, words: valid, source: obj.credits };
   };
 
   export const getScore = (state: Game.StateType) => {

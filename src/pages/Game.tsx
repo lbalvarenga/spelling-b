@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css, SerializedStyles } from "@emotion/react";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import Btn, { BtnOutline } from "../components/Btn";
@@ -14,6 +14,21 @@ import Game from "../components/GameLogic";
 const theme = {
   accent: "#F7DA43",
 };
+
+const dicts = [
+  {
+    name: "Webster Complete",
+    url: "/words_webster.json",
+  },
+  {
+    name: "Large Dictionary",
+    url: "/words_large.json",
+  },
+  {
+    name: "10000 Most Common",
+    url: "/words_google.json",
+  },
+];
 
 // TODO: cleanup code
 // TODO: add points calculation system
@@ -203,13 +218,28 @@ function GameView() {
         cursor: pointer;
       }
     `,
+
+    dicts: css`
+      text-decoration: underline;
+      font-size: inherit;
+      border: none;
+
+      cursor: pointer;
+
+      &:focus {
+        outline: none;
+      }
+    `,
   };
 
   const [state, _setState] = useState<Game.StateType>({
     game: {
       letters: "",
       words: [],
-      source: "",
+      dict: {
+        name: "",
+        url: "",
+      },
     },
     correct: [],
     guess: "",
@@ -228,26 +258,28 @@ function GameView() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function setup(letters: string) {
-      let game = await Game.getWords("/words_webster.json", letters);
-      while (game.words.length < 10) {
-        letters = Game.getLetters(7);
-        game = await Game.getWords("/words_webster.json", letters);
-      }
+  async function setup(letters: string, dict: { name: string; url: string }) {
+    const sr = stateRef.current;
 
-      navigate(`/play/${letters}`);
-
-      console.log(`${game.letters[0].toUpperCase()}, ${game.letters.slice(1)}`);
-      console.log(game.words);
-      setState({
-        ...stateRef.current,
-        game: game,
-        correct: [],
-        guess: "",
-      });
+    let game = await Game.getWords(dict, letters);
+    while (game.words.length < 10) {
+      letters = Game.getLetters(7);
+      game = await Game.getWords(dict, letters);
     }
 
+    navigate(`/play/${letters}`);
+
+    console.log(`${game.letters[0].toUpperCase()}, ${game.letters.slice(1)}`);
+    console.log(game.words);
+    setState({
+      ...sr,
+      game: game,
+      correct: [],
+      guess: "",
+    });
+  }
+
+  useEffect(() => {
     const li = location.pathname.lastIndexOf("/");
     const path = location.pathname.slice(li + 1);
 
@@ -258,7 +290,7 @@ function GameView() {
       letters = Game.getLetters(7);
     }
 
-    setup(letters);
+    setup(letters, dicts[0]);
   }, []);
 
   useEffect(() => {
@@ -401,6 +433,11 @@ function GameView() {
     });
   }
 
+  function changeDict(index: number) {
+    const sr = stateRef.current;
+    setup(sr.game.letters, dicts[index]);
+  }
+
   return (
     <div css={styles.container}>
       <div css={styles.left}>
@@ -519,9 +556,26 @@ function GameView() {
               })}
             </div>
             <p css={styles.footer}>
-              Source:{" "}
-              <a target="_blank" href={state.game.source}>
-                {state.game.source}
+              Dictionary: &nbsp;
+              <select
+                css={styles.dicts}
+                onChange={(event: ChangeEvent<HTMLSelectElement>) => {
+                  changeDict(Number(event.target.value));
+                }}
+              >
+                {dicts.map((dict, index) => (
+                  <option value={index}>{dict.name}</option>
+                ))}
+              </select>
+              <a
+                href={state.game.source}
+                css={css`
+                  float: right;
+                `}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Source
               </a>
             </p>
           </div>
