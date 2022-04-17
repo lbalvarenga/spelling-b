@@ -280,6 +280,7 @@ function GameView() {
   }
 
   useEffect(() => {
+    const sr = stateRef.current;
     const li = location.pathname.lastIndexOf("/");
     const path = location.pathname.slice(li + 1);
 
@@ -290,7 +291,7 @@ function GameView() {
       letters = Game.getLetters(7);
     }
 
-    setup(letters, dicts[0]);
+    setup(letters, sr.game.dict.url ? sr.game.dict : dicts[0]);
   }, []);
 
   useEffect(() => {
@@ -510,8 +511,9 @@ function GameView() {
             <button
               css={styles.refresh}
               onClick={() => {
-                navigate("/play");
-                window.location.reload();
+                const sr = stateRef.current;
+                const letters = Game.getLetters(7);
+                setup(letters, sr.game.dict.url ? sr.game.dict : dicts[0]);
               }}
             >
               <BtnOutline
